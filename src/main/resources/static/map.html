@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <title>多边形的绘制和编辑</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--高德地图API-->
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=8033553a16a1ea676ee7be143a46eb86&plugin=AMap.PolyEditor"></script>
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+</head>
+<body>
+<div id="container"></div>
+
+<!--<div class="input-card" style="width: 120px">-->
+<!--   <button class="btn" onclick="polyEditor.open()" style="margin-bottom: 5px">开始编辑</button>-->
+<!--   <button class="btn" onclick="polyEditor.close()">结束编辑</button>-->
+<!--</div>-->
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script type="text/javascript">
+
+    var map = new AMap.Map("container", {   // container是id为container的div
+        center: [114.597105, 36.655862],  // 地图中心坐标
+        zoom: 15,                         // zoom 焦距
+    });
+
+    // getAllMapsPolygon 可以获得地图的所有信息
+    axios.get("http://127.0.0.1/maps/getAllMapsPolygon").then(
+        function (res) {
+            if (res.data.message="200"){
+                var polygonNameArr = new Array();
+                var polygonArr = res.data.data;
+                for(i=0;i<polygonArr.length;i++){
+                    var polygon = new AMap.Polygon({
+                        path: polygonArr[i].mmapsList,
+                        fillColor: polygonArr[i].mfillColor, // 多边形填充颜色
+                        borderWeight: polygonArr[i].mborderWeight, // 线条宽度，默认为 1
+                        strokeColor: polygonArr[i].mstrokeColor, // 线条颜色
+                        fillOpacity:polygonArr[i].mfillOpacity,//填充物透明度
+                        strokeOpacity:polygonArr[i].mstrokeOpacity,//线条T透明度
+                        title:polygonArr[i].mtitle
+                    })
+                    var lat = (polygon.getBounds().getNorthEast().getLat()+polygon.getBounds().getSouthWest().getLat())/2
+                    var lng = (polygon.getBounds().getNorthEast().getLng()+polygon.getBounds().getSouthWest().getLng())/2
+                    var text = new AMap.Text({
+                        position: new AMap.LngLat(lng, lat),
+                        anchor: 'bottom-center',
+                        text: polygonArr[i].mtitle,
+                        style: {'background-color':'red'},
+                    });
+                    polygon.on('click',function(event){
+                        alert(event.target.w.title)
+                    })
+                    //添加范围区
+                    map.add(text)
+                    map.add(polygon);
+                    polygonNameArr.push(polygon)
+                }
+                // 缩放地图到合适的视野级别
+                map.setFitView(polygonNameArr)
+            }
+        },
+        function (err) {
+
+        }
+    )
+</script>
+</body>
+</html>

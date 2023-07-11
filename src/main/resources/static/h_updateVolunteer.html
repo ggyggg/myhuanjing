@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改志愿者信息</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--wangeditor css-->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <style>
+        #editor—wrapper {
+            border: 1px solid #ccc;
+            z-index: 100; /* 按需定义 */
+        }
+        #toolbar-container { border-bottom: 1px solid #ccc; }
+        #editor-container { height: 500px; }
+    </style>
+</head>
+<body>
+<div id="father">
+
+    <el-form :model="volunteer" :rules="rules"  label-width="100px" ref="volunteerForm" class="demo-volunteerForm">
+            <el-form-item label="志愿者姓名" prop="vname">
+                <el-input v-model="volunteer.vname"></el-input>
+            </el-form-item>
+
+        <el-form-item label="志愿者简介" prop="vcontext">
+            <div id="editor—wrapper">
+                <div id="toolbar-container"><!-- 工具栏 --></div>
+                <div id="editor-container"><!-- 编辑器 --></div>
+            </div>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="submitForm('volunteerForm')">立即修改</el-button>
+            <el-button @click="resetForm('volunteerForm')">重置</el-button>
+        </el-form-item>
+
+    </el-form>
+
+</div>
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<!--wangeditor js-->
+<script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+
+<script>
+
+    var neiRong = "";
+    // 创建实例对象
+    const { createEditor, createToolbar } = window.wangEditor
+    const editorConfig = {
+        MENU_CONF:{},
+        placeholder: '请在此处书写内容！',
+        onChange(editor) {
+            const html = editor.getHtml()
+            console.log('editor content', html);
+            neiRong = html;       // 修改后的内容赋值给neiRong
+        }
+    }
+    // 插入图片
+    editorConfig.MENU_CONF['insertImage'] = {
+        onInsertedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url, href } = imageNode
+            console.log('inserted image', src, alt, url, href)
+        }
+    }
+    // 编辑图片
+    editorConfig.MENU_CONF['editImage'] = {
+        onUpdatedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url } = imageNode
+            console.log('updated image', src, alt, url)
+        }
+    }
+
+    // 向编辑器中粘贴图片时触发该方法，完成上传图片
+    editorConfig.MENU_CONF['uploadImage'] = {
+        server: 'http://127.0.0.1/news/uploding',
+        fieldName:"file"   // file属性值一定和NewsController控制器的uploadImg方法的参数file相同
+    }
+    var app = new Vue({
+        el: "#father",
+        data() {
+            return {
+                volunteer: {
+                    vname: "",
+                    vcontext: "",
+                    vimgs: "",
+                    vtime: "",
+                },
+                rules: {
+                   vname: [
+                        {required: true, message: '请输入志愿者姓名', trigger: 'blur'},
+                        {min: 2, max: 5, message: '长度在 2到 5 个字符', trigger: 'blur'}
+                    ],
+                }
+
+            }
+        },
+        methods: {
+            submitForm(volunteerForm) {
+                var _this = this;
+                this.$refs[volunteerForm].validate(function (valid) {
+                    if (valid) {
+                        _this.volunteer.vcontext = neiRong;
+                        axios.post("http://127.0.0.1/volunteer/updateVolunteerById", _this.volunteer);
+                        window.location.href = "http://127.0.0.1/h_volunteer.html";
+                    } else {
+                        alert("修改失败！！！")
+                        console.log("updatevolunteer error");
+                        return false;
+                    }
+                });
+            },
+            resetForm(volunteerForm) {
+                this.$refs[volunteerForm].resetFields();
+
+            },
+            upload(response, file, fileList) {
+                this.volunteer.vimgs = response.data[0].alt;    // 上传的文件名
+            },
+        },
+        created() {   // 页面加载时执行
+            var id = location.href.split("=")[1];
+            var _this = this;
+            axios.get("http://localhost/volunteer/getVolunteerByid?id="+id).then(
+                function (res) {
+                    console.log(res.data)
+                    if (res.data.message == "200") {
+                        _this.volunteer = res.data.data;
+                        editor.setHtml(_this.volunteer.vcontext);
+                    }
+
+                })
+        }
+    })
+
+    // 必须放到最后
+    const editor = createEditor({
+        selector: '#editor-container',
+        html: '<p><br></p>',
+        config: editorConfig,
+        mode: 'default', // or 'simple'
+    })
+
+    const toolbarConfig = {}
+    const toolbar = createToolbar({
+        editor,
+        selector: '#toolbar-container',
+        config: toolbarConfig,
+        mode: 'default', // or 'simple'
+    })
+</script>
+
+
+</body>
+</html>

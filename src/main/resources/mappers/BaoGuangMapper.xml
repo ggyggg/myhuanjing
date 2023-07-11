@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xja.myhuanjing.mappers.BaoGuangMapper">
+    <insert id="insertBaoGuang">
+        insert into baoguang(btitle, bdepartment, bcontext, bimgs, bdate) values (#{btitle},#{bdepartment},#{bcontext},#{bimgs},now())
+    </insert>
+
+    <update id="updateBaoGuangById">
+        update baoguang set btitle = #{btitle},bdepartment = #{bdepartment},bcontext=#{bcontext},bimgs=#{bimgs},bdate=now() where bid  = #{bid}
+    </update>
+
+    <delete id="deleteBaoGuangById">
+        delete  from baoguang where  bid = #{bid}
+    </delete>
+
+    <select id="getAllBaoGuang" resultType="cn.xja.myhuanjing.bean.BaoGuang">
+        select bid, btitle, bdepartment, bcontext, bimgs, bdate  from baoguang
+    </select>
+
+    <select id="getBaoGuangByBid" resultType="cn.xja.myhuanjing.bean.BaoGuang">
+        select bid,btitle, bdepartment, bcontext, bimgs, bdate from baoguang where bid  = #{bid}
+    </select>
+
+    <select id="getBaoGuangByDescFour" resultType="cn.xja.myhuanjing.bean.BaoGuang">
+        select * from baoguang  ORDER BY bdate desc LIMIT 0,4
+    </select>
+</mapper>

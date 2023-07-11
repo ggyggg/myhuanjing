@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>校园环境管理系统</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" type="text/css" href="css/h_index.css"/>
+</head>
+<body>
+
+<!-- Container 布局容器 -->
+<el-container id="father" style="height: 97%; border: 1px solid #eee">
+
+    <el-header  style="text-align: left; font-size: 15px;height: 80px;padding: 10px;">
+
+        <div class="left">
+            <img src="img/logo.png" width="60"> <span>校园环境管理系统</span>
+        </div>
+
+        <div class="right">
+            <!--Dropdown 下拉菜单-->
+            <el-dropdown>
+                <el-button  round></el-button>
+                <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>查看</el-dropdown-item>
+                    <el-dropdown-item>新增</el-dropdown-item>
+                    <el-dropdown-item>删除</el-dropdown-item>
+                </el-dropdown-menu>
+            </el-dropdown>
+        </div>
+
+    </el-header>
+
+    <el-container style="height: 100%;">
+
+        <el-aside width="200px" style="background-color: white;margin-top: 20px;height: 100%;">
+            <!-- NavMenu 导航菜单
+            菜单展开第一块:default-openeds内容里面就只写1 -->
+            <el-menu :default-openeds="['1']">
+
+                <el-submenu index="1">
+                    <!--Icon 图标-->
+                    <template slot="title"><i class="el-icon-loading"></i>环境新闻</template>
+                    <el-menu-item index="1-1">
+
+                        <a href="h_xinwen.html" target="main">新闻管理</a>
+                    </el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="2">
+                    <template slot="title"><i class="el-icon-loading"></i>志愿者</template>
+                    <el-menu-item index="2-1">
+                        <a href="h_volunteer.html" target="main">志愿者管理</a>
+                    </el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="3">
+                    <template slot="title"><i class="el-icon-loading"></i>校园环境建议</template>
+                    <el-menu-item index="3-1">
+                        <a href="h_suggestion.html"  target="main">校园环境建议管理</a>
+                    </el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="4">
+                    <template slot="title"><i class="el-icon-loading"></i>曝光台</template>
+                    <el-menu-item index="4-1">
+                        <a href="h_baoguangtai.html" target="main">曝光台管理</a>
+                    </el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="5">
+                    <template slot="title"><i class="el-icon-loading"></i>专题</template>
+                    <el-menu-item index="5-1">
+                        <a href="h_zhuanti.html" target="main">专题管理</a>
+                    </el-menu-item>
+                </el-submenu>
+            </el-menu>
+        </el-aside>
+
+        <el-main style="height: 100%;background-color: white;margin-top: 20px;margin-left: 2px;padding: 20px 20px 0 20px;">
+            <iframe name="main" src="h_welcome.html">
+
+            </iframe>
+        </el-main>
+
+    </el-container>
+
+</el-container>
+
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var app = new Vue({
+        el:"#father",
+        data:{
+
+        },
+        methods:{
+
+        }
+    });
+</script>
+
+
+</body>
+</html>

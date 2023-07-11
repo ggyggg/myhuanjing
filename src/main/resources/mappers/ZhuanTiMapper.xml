@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--  修改mapper接口的包名 -->
+<mapper namespace="cn.xja.myhuanjing.mappers.ZhuanTiMapper">
+
+    <insert id="insertZhuanTi">
+        insert into zhuanti(ztitle, zauthor, zcontext, zimgs, zdate) values (#{ztitle},#{zauthor},#{zcontext},#{zimgs},now())
+    </insert>
+
+    <update id="updateZhuanTiById">
+        update zhuanti set zauthor = #{zauthor},zcontext=#{zcontext},ztitle = #{ztitle},zdate=now() where zid  = #{zid}
+    </update>
+
+    <delete id="deleteZhuanTiById">
+        delete  from zhuanti where  zid = #{zid}
+    </delete>
+
+    <select id="getAllZhuanTi" resultType="cn.xja.myhuanjing.bean.ZhuanTi">
+        select zid, ztitle, zauthor, zcontext, zimgs, zdate  from zhuanti
+    </select>
+
+    <select id="getZhuanTiByZid" resultType="cn.xja.myhuanjing.bean.ZhuanTi">
+        select zid, ztitle, zauthor, zcontext, zimgs, zdate from zhuanti where zid  = #{zid}
+    </select>
+
+    <select id="getZhuanTiByDescFour" resultType="cn.xja.myhuanjing.bean.ZhuanTi">
+        select * from zhuanti  ORDER BY zdate desc LIMIT 0,4
+    </select>
+</mapper>

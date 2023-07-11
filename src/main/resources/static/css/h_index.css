@@ -1,0 +1,47 @@
+  #father{
+  	margin: 20px auto;
+  }
+  html{
+	height: 96%;  
+  }
+  body{
+	height: 100%;
+  	background-color: #F7F7F7;
+  }
+  .el-header {
+    background-color: white;
+    color: #333;
+	position: relative;
+  }
+  .el-header .left{
+	  font-size: 20px;
+	  height: 60px;
+  }
+    .el-header .left span{
+		line-height: 60px;
+		display: inline-block;
+		vertical-align: top;
+		color: #409EFF;
+		font-weight: 900;
+	}
+  .el-header .right{
+	  position: absolute;
+	  right: 10px;
+	  top: 30px;
+  }
+  .el-aside {
+    color: #333;
+  }
+
+  .el-main iframe{
+	  width: 98%;
+	  height: 99%;
+	  border: 0px;
+  }
+  .el-menu-item a{
+	  text-decoration: none;
+	  color: black;
+	  display: inline-block;
+	  width: 100%;
+	  height: 100%;
+  }

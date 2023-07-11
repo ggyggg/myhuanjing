@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--  修改mapper接口的包名 -->
+<mapper namespace="cn.xja.myhuanjing.mappers.MapsMapper">
+
+    <insert id="insertMapsPolygon">
+        INSERT INTO `huanjing`.`map` (`mpolygonName`, `mpath`, `mstrokeOpacity`, `mstrokeColor`,
+        `mborderWeight`, `mfillColor`, `mfillOpacity`, `mtitle`)
+        VALUES (#{mpolygonName},#{mpath},#{mstrokeOpacity},#{mstrokeColor},
+        #{mborderWeight},#{mfillColor},#{mfillOpacity},#{mtitle});
+    </insert>
+
+    <!--  修改实体类的包名 -->
+    <select id="getAllMapsPolygon" resultType="cn.xja.myhuanjing.bean.Maps">
+        select mid, mpolygonName, mpath, mstrokeOpacity, mstrokeColor, mborderWeight,
+        mfillColor, mfillOpacity,mtitle from map
+    </select>
+</mapper>

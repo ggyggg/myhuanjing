@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻管理</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .el-pagination{
+            text-align: center;
+            margin-top: 15px;
+        }
+        .el-table .el-button{
+            padding: 6px 15px;
+        }
+        .el-table th.el-table__cell{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="father">
+
+        <div class="top">
+            <el-button type="primary" icon="el-icon-add-location"
+                @click="insertNews">增加新闻</el-button>
+
+            <el-table :data="pageInfo.list" height="500">
+
+                <el-table-column prop="xid" label="编号" width="60">
+                </el-table-column>
+                <el-table-column prop="xtitle" :show-overflow-tooltip="true" label="标题">
+                </el-table-column>
+                <el-table-column prop="xauthor" label="作者" align="center">
+                </el-table-column>
+                <el-table-column prop="xdate" :formatter="dateFormat"   label="发布时间" align="center">
+                </el-table-column>
+                <el-table-column align="center" width="200" label="操作">
+                    <!--自定义列模板-->
+                    <template slot-scope="scope">
+                        <el-button type="primary" @click="xiuGai(scope)">修改</el-button>
+                        <el-button type="danger" @click="shanChu(scope)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <el-pagination
+                    background
+                    layout="prev, pager, next"
+                    :total="pageInfo.total"
+                    :page-size="8"
+                    @current-change="handleCurrentChange">
+            </el-pagination>
+
+        </div>
+    </div>
+
+    <!-- vue:引入组件库 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- elementui基于vue定义的组件：引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!--moment.js-->
+    <script src="js/moment.js"></script>
+
+    <script type="text/javascript">
+        var app = new Vue({
+            el:"#father",
+            data(){
+                return{
+                    pageNum:1,   // 当前页码
+                    pageInfo:{}
+                }
+            },
+            methods:{
+                xiuGai:function(event){
+                    // event是指的表格的所有数据，row是当前行
+                    location.href = "h_updateNews.html?xid="+event.row.xid;
+                },
+                dateFormat(row, column, cellValue, index){
+                    var date = new Date(cellValue);
+                    if(date==undefined){
+                        return "";
+                    }
+                    return moment(date).format("YYYY-MM-DD HH:mm:ss")
+                },
+                shanChu:function(event){
+                    // console.log(event.row.xid)
+                    var xid = event.row.xid;
+                    var _this = this;
+                    this.$confirm("此操作将永久删除改新闻，是否继续？","提示",
+                                  {
+                                      confirmButtonText:"确定",
+                                      cancelButtonText:"取消",
+                                      type:"warning"
+                                  }).then(  function(){
+                                        // 删除   {"xid":xid}上传参数，是对象类型
+                                        axios.post("http://127.0.0.1/news/deleteNewsById",{"xid":xid})
+                                        _this.fanPage(_this.pageNum)
+                                    })
+
+
+                },
+                insertNews:function(){
+                    window.location.href = "h_insertNews.html";
+                },
+                handleCurrentChange(page){   // page 当前页
+                    this.fanPage(page)
+                    this.pageNum = page
+                },
+                fanPage(pageNum){
+                    var _this = this;
+                    axios.get("http://127.0.0.1/news/getAll?&size=8&pageNum="+pageNum).then(
+
+                        function(res){
+                            if(res.data.message == "200" ){
+                                // 回调函数中是不能直接使用this
+                                _this.pageInfo = res.data.data;
+                            }
+                        }
+                    )
+                },
+            },
+            created:function(){   // 页面加载后执行
+                this.fanPage(1);   // 显示第一页
+            }
+        });
+
+
+    </script>
+
+
+</body>
+</html>

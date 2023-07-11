@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--  修改mapper接口的包名 -->
+<mapper namespace="cn.xja.myhuanjing.mappers.NewsMapper">
+
+    <insert id="insertNews">
+        insert into news(xtitle, xauthor, xcontext, xdate) values (#{xtitle},#{xauthor},#{xcontext},now())
+    </insert>
+
+    <update id="updateNewsById">
+        update news set xauthor = #{xauthor},xcontext=#{xcontext},xtitle = #{xtitle},xdate=now() where xid  = #{xid}
+    </update>
+
+    <delete id="deleteNewsById">
+        delete  from news where  xid = #{xid}
+    </delete>
+
+    <!-- 修改实体类的包名 -->
+    <select id="getAllNews" resultType="cn.xja.myhuanjing.bean.News">
+        select xid, xtitle, xauthor, xcontext, ximgs, xdate  from news
+    </select>
+
+    <select id="getNewsByXid" resultType="cn.xja.myhuanjing.bean.News">
+        select xid, xtitle, xauthor, xcontext, ximgs, xdate from news where xid  = #{xid}
+    </select>
+
+</mapper>

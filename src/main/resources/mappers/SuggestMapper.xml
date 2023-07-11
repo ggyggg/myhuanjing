@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xja.myhuanjing.mappers.SuggestMapper">
+    <insert id="insertSuggest">
+        insert into suggestions(stitle,stime,scontext ) values (#{stitle},now(),#{scontext})
+    </insert>
+
+    <update id="updateSuggestById">
+        update suggestions set stitle = #{stitle},stime=now(),scontext=#{scontext} where sid  = #{sid}
+    </update>
+
+    <delete id="deleteSuggestById">
+        delete  from suggestions where  sid = #{sid}
+    </delete>
+
+    <select id="getAllSuggest" resultType="cn.xja.myhuanjing.bean.Suggest">
+        select sid, stitle,stime,scontext from suggestions
+    </select>
+
+    <select id="getSuggestByZid" resultType="cn.xja.myhuanjing.bean.Suggest">
+        select sid, stitle,stime,scontext from suggestions where sid  = #{sid}
+    </select>
+
+    <select id="getSuggestByDescFour" resultType="cn.xja.myhuanjing.bean.Suggest">
+        select * from suggestions  ORDER BY stime desc LIMIT 0,4
+    </select>
+</mapper>

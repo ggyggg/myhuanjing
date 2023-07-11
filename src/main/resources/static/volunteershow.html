@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="css/newsshow.css"><!-- 图片不一定必须ico格式 -->
+</head>
+<body>
+<div id="father">
+    <div class="bg">
+        <p>志愿者简介</p>
+    </div>
+    <div class="content">
+        <div class="title">
+            <p>{{volunteer.vname}}</p>
+            <p>
+                <span>{{volunteer.vtime}}</span>
+            </p>
+        </div>
+        <div class="neirong" v-html="volunteer.vcontext"></div>
+    </div>
+</div>
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vu定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var app = new Vue({
+        el:"#father",
+        data:{
+            volunteer:{}
+        },
+        methods:{
+
+        },
+        created:function () {
+            var _this = this;
+            var id = location.href.split("=")[1];
+            axios.get("http://127.0.0.1:/volunteer/getVolunteerByid?id="+id).then(
+                function (res) {
+                    console.log(res.data);
+                    if (res.data.message =="200"){
+                        _this.volunteer = res.data.data
+                    }
+                },
+                function (err) {
+
+                }
+            )
+        }
+    })
+</script>
+</body>
+</html>

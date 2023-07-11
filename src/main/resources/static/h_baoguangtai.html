@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公示管理</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .el-pagination{
+            text-align: center;
+            margin-top: 15px;
+        }
+        .el-table .el-button{
+            padding: 6px 15px;
+        }
+        .el-table th.el-table__cell{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="father">
+
+    <div class="top">
+
+        <el-button type="primary" icon="el-icon-upload"
+                   @click="insertBaoGuang">添加公示</el-button>
+
+        <el-table :data="pageInfo.list"  style="width: 100%" height="480">
+
+            <el-table-column prop="bid" label="编号" width="60"></el-table-column>
+
+            <el-table-column prop="btitle" label="标题" :show-overflow-tooltip="true"></el-table-column>
+
+            <el-table-column prop="bdepartment" label="部门" align="center"></el-table-column>
+
+            <el-table-column label="公示图片" align="center" width="180">
+                <template slot-scope="scope">
+                    <!-- scope代表的是当前页的所有数据，scope.row表示当前行数据 -->
+                    <img :src="'http://localhost/img/upload/'+scope.row.bimgs" width="262" height="60"/>
+                </template>
+            </el-table-column>
+
+            <el-table-column prop="bdate" label="发布日期" :formatter="dateFormat"
+                             align="center"></el-table-column>
+
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button
+                            size="mini"
+                            type="primary"
+                            @click="xiuGai(scope)">修改</el-button>
+                    <el-button
+                            size="mini"
+                            type="danger"
+                            @click="shanChu(scope)">删除</el-button>
+                </template>
+            </el-table-column>
+
+        </el-table>
+
+        <el-pagination
+                background
+                layout="prev, pager, next"
+                :page-size="4"
+                :total="pageInfo.total"
+                @current-change="handleCurrentChange">
+        </el-pagination>
+
+    </div>
+
+</div>
+
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!--moment.js-->
+<script src="js/moment.js"></script>
+
+<script>
+    var app =  new Vue({
+        el:"#father",
+        data(){
+            return{
+                pageNum:1,     // 当前页码
+                pageInfo:{}    // 当前页信息
+            }
+        },
+        methods:{
+            handleCurrentChange(page){
+                this.fanPage(page);
+                this.pageNum = page;
+            },
+            xiuGai(event){
+                location.href="h_updateBaoguang.html?bid="+event.row.bid;
+            },
+            shanChu:function(event){
+                // console.log(event.row.zid)
+                var bid = event.row.bid;
+                var _this = this;
+                this.$confirm("此操作将永久删除该专题，是否继续？","提示",
+                    {
+                        confirmButtonText:"确定",
+                        cancelButtonText:"取消",
+                        type:"warning"
+                    }).then(  function(){
+                    // 删除   {"zid":zid}上传参数，是对象类型
+                    axios.post("http://127.0.0.1/baoguang/deleteBaoguangById",{"bid":bid})
+                    _this.fanPage(_this.pageNum)
+                    alert("删除成功")
+                })
+
+
+            },
+            dateFormat(row, column, cellValue, index){
+                var date = new Date(cellValue);
+                if(date==undefined){
+                    return "";
+                }
+                return moment(date).format("YYYY-MM-DD HH:mm:ss")
+            },
+            fanPage(pageNum){
+                var _this = this;
+                axios.get("http://localhost/baoguang/getAll?size=4&pageNum="+pageNum)
+                    .then(function(res){
+                        console.log(res.data);
+                        _this.pageInfo = res.data.data;
+                        console.log(_this.pageInfo)
+                    });
+            },
+            insertBaoGuang(){
+                location.href = "h_insertBaoguang.html";
+            },
+        },
+        created(){   // 页面加载后执行
+            this.fanPage(1)   // 显示第一页
+        }
+    });
+
+</script>
+</body>
+</html>

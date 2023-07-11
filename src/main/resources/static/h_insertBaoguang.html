@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>曝光</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--wangEditor css-->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <style>
+        #editor—wrapper {
+            border: 1px solid #ccc;
+            z-index: 100; /* 按需定义 */
+        }
+        #toolbar-container { border-bottom: 1px solid #ccc; }
+        #editor-container { height: 500px; }
+    </style>
+</head>
+<body>
+<div id="father">
+
+    <el-form :model="baoguang" :rules="rules"  label-width="100px" ref="baoguangForm" class="demo-baoguangForm">
+        <el-form-item label="公示标题" prop="btitle">
+            <el-input v-model="baoguang.btitle"></el-input>
+        </el-form-item>
+
+        <el-form-item label="公示部门" prop="bdepartment">
+            <el-input v-model="baoguang.bdepartment"></el-input>
+        </el-form-item>
+
+        <el-form-item label="公示图片" >
+            <el-upload
+                    class="upload-demo"
+                    :multiple="false"
+                    :limit="1"
+                    action="http://127.0.0.1/news/uploadImg"
+                    list-type="picture"
+                    :on-success="upload">
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            </el-upload>
+        </el-form-item>
+
+        <el-form-item label="公示内容" prop="bcontext">
+            <div id="editor—wrapper">
+                <div id="toolbar-container"><!-- 工具栏 --></div>
+                <div id="editor-container"><!-- 编辑器 --></div>
+            </div>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="submitForm('baoguangForm')">立即创建</el-button>
+            <el-button @click="resetForm('baoguangForm')">重置</el-button>
+        </el-form-item>
+
+    </el-form>
+
+</div>
+
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<!--wangeditor js-->
+<script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+
+<script>
+
+    var neiRong = "";
+    // 创建实例对象
+    const { createEditor, createToolbar } = window.wangEditor
+    const editorConfig = {
+        MENU_CONF:{},
+        placeholder: '请在此处书写文件内容！',
+        onChange(editor) {
+            const html = editor.getHtml()
+            console.log('editor content', html);
+            neiRong = html;       // 修改后的内容赋值给neiRong
+        }
+    }
+    // 插入图片
+    editorConfig.MENU_CONF['insertImage'] = {
+        onInsertedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url, href } = imageNode
+            console.log('inserted image', src, alt, url, href)
+        }
+    }
+    // 编辑图片
+    editorConfig.MENU_CONF['editImage'] = {
+        onUpdatedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url } = imageNode
+            console.log('updated image', src, alt, url)
+        }
+    }
+
+    // 向编辑器中粘贴图片时触发该方法，完成上传图片
+    editorConfig.MENU_CONF['uploadImage'] = {
+        server: 'http://127.0.0.1/news/uploadImg',
+        fieldName:"file"   // file属性值一定和NewsController控制器的uploadImg方法的参数file相同
+    }
+
+    var app = new Vue({
+        el:"#father",
+        data:{
+           baoguang:{
+               btile:"",
+               bdepartment:"",
+               bcontext:"",
+               bimgs:"",
+               bdate:"",
+            },
+            rules: {
+               btitle: [
+                    {required: true, message: '请输入公示标题', trigger: 'blur'},
+                    {min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur'}
+                ],
+               bdepartment: [
+                    {required: true, message: '请输入公示部门', trigger: 'blur'},
+                    {min: 2, max: 10, message: '长度在2 到 10 个字符', trigger: 'blur'}
+                ],
+            }
+        },
+        methods:{
+            submitForm(baoguangForm){
+                var _this = this;
+                this.$refs[baoguangForm].validate(function (valid) {
+                    if(valid){
+                        _this.baoguang.bcontext = neiRong;
+                        axios.post("http://127.0.0.1/baoguang/insertBaoguang",_this.baoguang);
+                        window.location.href = "http://127.0.0.1/h_baoguangtai.html";
+                    }
+                    else{
+                        console.log("insertbaoguang error");
+                        alert("添加失败")
+                        return false;
+                    }
+                });
+            },
+            resetForm(baoguangForm) {
+                this.$refs[baoguangForm].resetFields();
+
+            },
+            upload(response, file, fileList){
+                this.baoguang.bimgs = response.data[0].alt;    // 上传的文件名
+            },
+        }
+    });
+    // 必须放到最后
+    const editor = createEditor({
+        selector: '#editor-container',
+        html: '<p><br></p>',
+        config: editorConfig,
+        mode: 'default', // or 'simple'
+    })
+
+    const toolbarConfig = {}
+    const toolbar = createToolbar({
+        editor,
+        selector: '#toolbar-container',
+        config: toolbarConfig,
+        mode: 'default', // or 'simple'
+    })
+
+
+</script>
+
+
+</body>
+</html>

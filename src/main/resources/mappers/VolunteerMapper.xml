@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.xja.myhuanjing.mappers.VolunteerMapper">
+    <insert id="insertVolunteer">
+        insert into volunteer(vname, vcontext, vimgs, vtime) values (#{vname},#{vcontext},#{vimgs},now())
+    </insert>
+
+    <update id="updateVolunteerById">
+        update volunteer set vname = #{vname},vcontext=#{vcontext},vtime=now() where id = #{id}
+    </update>
+
+    <delete id="deleteVolunteerById">
+        delete  from volunteer where  id = #{id}
+    </delete>
+
+    <select id="getAllVolunteer" resultType="cn.xja.myhuanjing.bean.Volunteer">
+        select id, vname, vcontext, vimgs, vtime  from volunteer
+    </select>
+
+    <select id="getVolunteerByZid" resultType="cn.xja.myhuanjing.bean.Volunteer">
+        select id, vname, vcontext, vimgs, vtime from volunteer where id  = #{id}
+    </select>
+
+    <select id="getVolunteerByDescFour" resultType="cn.xja.myhuanjing.bean.Volunteer">
+        select * from volunteer  ORDER BY vtime desc LIMIT 0,4
+    </select>
+</mapper>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css"/>
+</head>
+<body>
+<div id="father">
+    <template>
+        <el-carousel :interval="4000" type="card" height="375px">
+            <el-carousel-item v-for="item in volunteerList" :key="item.id">
+                <a :href="'volunteershow.html?id='+item.id">
+                   {{ item.vname }}
+                    <img :src="'http://localhost/img/upload/'+item.vimgs"/>
+                </a>
+            </el-carousel-item>
+        </el-carousel>
+    </template>
+</div>
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- axios -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var app = new Vue({
+        el: "#father",
+        data() {
+            return {
+                volunteerList:[],
+            }
+        },
+        created(){
+                var _this = this;
+                axios.get("http://localhost/volunteer/getVolunteerByDescFour")
+                    .then(function (res) {
+                        if (res.data.message == "200") {
+                            _this.volunteerList = res.data.data;
+                        }
+                    });
+
+        }
+    })
+
+</script>
+</body>
+</html>

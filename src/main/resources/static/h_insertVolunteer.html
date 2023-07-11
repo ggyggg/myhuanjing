@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>志愿者添加</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--wangEditor css-->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <style>
+        #editor—wrapper {
+            border: 1px solid #ccc;
+            z-index: 100; /* 按需定义 */
+        }
+        #toolbar-container { border-bottom: 1px solid #ccc; }
+        #editor-container { height: 500px; }
+    </style>
+</head>
+<body>
+<div id="father">
+
+    <el-form :model="volunteer" :rules="rules"  label-width="100px" ref="volunteerForm" class="demo-volunteerForm">
+        <el-form-item label="志愿者姓名" prop="vname">
+            <el-input v-model="volunteer.vname"></el-input>
+        </el-form-item>
+
+        <el-form-item label="专题图片" >
+            <el-upload
+                    class="upload-demo"
+                    :multiple="false"
+                    :limit="1"
+                    action="http://127.0.0.1/news/uploadImg"
+                    list-type="picture"
+                    :on-success="upload">
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            </el-upload>
+        </el-form-item>
+
+        <el-form-item label="简介" prop="vcontext">
+            <div id="editor—wrapper">
+                <div id="toolbar-container"><!-- 工具栏 --></div>
+                <div id="editor-container"><!-- 编辑器 --></div>
+            </div>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="submitForm('volunteerForm')">立即创建</el-button>
+            <el-button @click="resetForm('volunteerForm')">重置</el-button>
+        </el-form-item>
+
+    </el-form>
+
+</div>
+
+<!-- vue:引入组件库 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- elementui基于vue定义的组件：引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<!--wangeditor js-->
+<script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+
+<script>
+
+    var neiRong = "";
+    // 创建实例对象
+    const { createEditor, createToolbar } = window.wangEditor
+    const editorConfig = {
+        MENU_CONF:{},
+        placeholder: '请在此处书写专题内容！',
+        onChange(editor) {
+            const html = editor.getHtml()
+            console.log('editor content', html);
+            neiRong = html;       // 修改后的内容赋值给neiRong
+        }
+    }
+    // 插入图片
+    editorConfig.MENU_CONF['insertImage'] = {
+        onInsertedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url, href } = imageNode
+            console.log('inserted image', src, alt, url, href)
+        }
+    }
+    // 编辑图片
+    editorConfig.MENU_CONF['editImage'] = {
+        onUpdatedImage(imageNode) {                    // JS 语法
+            if (imageNode == null) return
+
+            const { src, alt, url } = imageNode
+            console.log('updated image', src, alt, url)
+        }
+    }
+
+    // 向编辑器中粘贴图片时触发该方法，完成上传图片
+    editorConfig.MENU_CONF['uploadImage'] = {
+        server: 'http://127.0.0.1/news/uploding',
+        fieldName:"file"   // file属性值一定和NewsController控制器的uploadImg方法的参数file相同
+    }
+
+    var app = new Vue({
+        el:"#father",
+        data(){
+            return {
+                volunteer: {
+                    vname: "",
+                    vcontext: "",
+                    vimgs: "",
+                    vtime: "",
+                },
+                rules: {
+                    vname: [
+                        {required: true, message: '请输入志愿者姓名', trigger: 'blur'},
+                        {min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur'}
+                    ],
+                }
+            }
+        },
+        methods:{
+            submitForm(volunteerForm){
+                var _this = this;
+                this.$refs[volunteerForm].validate(function (valid) {
+                    if(valid){
+                        _this.volunteer.vcontext = neiRong;
+                        alert(neiRong);
+                        axios.post("http://127.0.0.1/volunteer/insertVolunteer",_this.volunteer);
+                        window.location.href = "http://127.0.0.1/h_volunteer.html";
+                    }
+                    else{
+                        console.log("insertvolunteer error");
+                        return false;
+                    }
+                });
+            },
+            resetForm(volunteerForm) {
+                this.$refs[volunteerForm].resetFields();
+
+            },
+            upload(response, file, fileList){
+                this.volunteer.vimgs = response.data[0].alt;    // 上传的文件名
+            },
+        }
+    });
+
+    // 必须放到最后
+    const editor = createEditor({
+        selector: '#editor-container',
+        html: '<p><br></p>',
+        config: editorConfig,
+        mode: 'default', // or 'simple'
+    })
+
+    const toolbarConfig = {}
+    const toolbar = createToolbar({
+        editor,
+        selector: '#toolbar-container',
+        config: toolbarConfig,
+        mode: 'default', // or 'simple'
+    })
+
+
+</script>
+
+
+</body>
+</html>

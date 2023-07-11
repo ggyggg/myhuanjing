@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>更新新闻</title>
+    <!-- elemntui的样式：引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--wangeditor css-->
+    <link href="https://unpkg.com/@wangeditor/editor@latest/dist/css/style.css" rel="stylesheet">
+    <style>
+        #editor—wrapper {
+            border: 1px solid #ccc;
+            z-index: 100; /* 按需定义 */
+        }
+        #toolbar-container { border-bottom: 1px solid #ccc; }
+        #editor-container { height: 500px; }
+    </style>
+</head>
+<body>
+    <div id="father">
+
+        <el-form :model="news" :rules="rules" label-width="100px" ref="newsForm">
+
+            <el-form-item label="新闻标题" prop="xtitle">
+                <el-input v-model="news.xtitle"></el-input>
+            </el-form-item>
+
+            <el-form-item label="新闻作者" prop="xauthor">
+                <el-input v-model="news.xauthor"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <div id="editor—wrapper">
+                    <div id="toolbar-container"><!-- 工具栏 --></div>
+                    <div id="editor-container"><!-- 编辑器 --></div>
+                </div>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="submitForm('newsForm')">立即修改</el-button>
+                <el-button @click="resetForm('newsForm')">重置</el-button>
+            </el-form-item>
+
+        </el-form>
+
+    </div>
+    <!-- vue，elementui，axios，jquery，wangeditor的js -->
+    <!-- vue:引入组件库 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- elementui基于vue定义的组件：引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <!--wangeditor js-->
+    <script src="https://unpkg.com/@wangeditor/editor@latest/dist/index.js"></script>
+
+    <script>
+
+        var neiRong = "";    // 内容
+        const { createEditor, createToolbar } = window.wangEditor
+
+        // 编辑器配置
+        const editorConfig = {
+            MENU_CONF:{},
+            placeholder: '请在此处书写新闻内容！',
+            onChange(editor) {      // 编辑器内容发生变化时执行
+                const html = editor.getHtml()
+                console.log('editor content', html);
+                neiRong = html;    // 修改后的内容赋值给neiRong
+            }
+        }
+
+        // 插入图片
+        editorConfig.MENU_CONF['insertImage'] = {
+            onInsertedImage(imageNode) {                    // JS 语法
+                if (imageNode == null) return
+
+                const { src, alt, url, href } = imageNode
+                console.log('inserted image', src, alt, url, href)
+            }
+        }
+        // 编辑图片
+        editorConfig.MENU_CONF['editImage'] = {
+            onUpdatedImage(imageNode) {                    // JS 语法
+                if (imageNode == null) return
+
+                const { src, alt, url } = imageNode
+                console.log('updated image', src, alt, url)
+            }
+        }
+
+        // 上传图片
+        editorConfig.MENU_CONF['uploadImage'] = {
+            server: 'http://127.0.0.1/news/uploadImg',   // 上传文件的路径
+            fieldName:"file"  // file属性值一定和NewsController控制器的uploadImg方法的参数file相同
+        }
+
+        var app = new Vue({
+            el:"#father",
+            data(){
+                return {
+                    news:{
+                        xtitle:'',
+                        xauthor:'',
+                        xcontext:'',
+                        xid:''
+                    },
+                    rules:{
+                        xtitle:[
+                            { required: true, message: '请输入新闻名称', trigger: 'blur' },
+                            { min: 3, max: 50, message: '长度在 3 到 50 个字符', trigger: 'blur' }
+                        ],
+                        xauthor:[
+                            { required: true, message: '请输入新闻作者', trigger: 'blur' },
+                            { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+                        ]
+                    }
+                }
+            },
+            methods:{
+                submitForm:function(formName){
+                    var _this = this;
+                    /*
+                        当表单格式错误时，不让提交的实现步骤：
+                        1.   <el-form .... ref="newsForm">增加ref属性
+                        2.   <el-button .... @click="submitForm('newsForm')">立即修改</el-button>
+                                 submitForm函数的参数必须是字符串，并且和ref属性值相同
+                        3.   submitForm:function(formName)
+                             submitForm函数增加参数formName，接收字符串'newsForm'
+                        4.   函数代码如下：
+                     */
+                    // this.$refs[formName] 表示newsForm表单，validate方法是进行表单验证
+                    // 验证后执行回调函数，函数参数valid是是否成功的值
+                    this.$refs[formName].validate(
+                        function(valid) {
+
+                            if(valid){   // 验证成功！！
+                                // alert("验证成功，可以修改");
+                                _this.news.xcontext = neiRong;
+                                axios.post("http://localhost/news/updateNewsById",_this.news).
+                                      then(function(res){
+                                            if(res.data.message=="200"){   // 更新成功
+                                                location.href = "h_xinwen.html";
+                                            }
+                                        })
+
+
+                            }
+                            else{        // 验证失败
+                                alert("验证失败，不可以修改");
+                                return false;
+                            }
+
+                        }
+                    )
+                },
+                resetForm:function(formName){
+                    this.$refs[formName].resetFields();
+                },
+            },
+            created(){   // 页面加载时执行
+                var xid = location.href.split("=")[1];
+                var _this = this;
+                axios.get("http://localhost/news/getNewsByXid?xid="+xid).then(
+                    function (res) {
+                        console.log(res.data)
+                        if(res.data.message=="200"){
+                            _this.news = res.data.data;
+                            editor.setHtml(_this.news.xcontext);
+                        }
+                    }
+                );
+            }
+        });
+
+        // 必须放到最后
+        const editor = createEditor({
+            selector: '#editor-container',
+            html: '<p><br></p>',
+            config: editorConfig,
+            mode: 'default', // or 'simple'
+        })
+
+        const toolbarConfig = {}
+        const toolbar = createToolbar({
+            editor,
+            selector: '#toolbar-container',
+            config: toolbarConfig,
+            mode: 'default', // or 'simple'
+        })
+
+
+    </script>
+</body>
+</html>
